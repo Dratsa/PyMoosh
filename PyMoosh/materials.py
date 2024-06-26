@@ -107,6 +107,29 @@ class Material:
                 print(f'Warning: Given data is not in the right format for a \'Default\' specialType. You should check the data format or specify a specialType. You can refer to the following table:')
                 print(self.__doc__)
 
+        
+        elif SpecialType == "NL":
+            if  mat.__class__.__name__ == "function" :
+                self.type = "NonLocalCustomFunction"
+                self.name = "NonLocalCustomFunction : " + mat.__name__
+                self.mat = mat
+                self.beta = mat(500)[3] 
+                print(self.name)
+                if verbose :
+                    print("Custom dispersive material. Epsilon = ", mat.__name__, "(wavelength in nm)")
+
+            elif len(mat) == 4 or len(mat) == 5:
+                self.type = "NonLocalMaterial"
+                self.mat = mat
+                if len(mat) == 4 :
+                    self.permeability = 1.0
+                else :
+                    self.permeability = mat[4]
+                self.name = f"Simple, NonLocalMaterial : [chi_b = {self.chi_b}, chi_f = {self.chi_f}, w_p = {self.w_p}, beta = {self.beta}, mu = {self.permeability}]"
+                print(self.name)
+                if verbose :
+                    print("Magnetic, non dispersive : epsilon=", mat[0], "mu=", mat[1])
+                    
         elif specialType == "RII":
             if len(mat) != 3:
                 print(f'Warning: Material RefractiveIndex Database is expected to be a list of 3 values, but {len(mat)} were given.')
@@ -206,9 +229,14 @@ class Material:
             return np.interp(wavelength, self.wavelength_list, self.permittivities)
         elif self.type == "Anisotropic":
             print(f'Warning: Functions for anisotropic materials generaly requires more information than isotropic ones. You probably want to use \'get_permittivity_ani()\' function.')
+        
+        elif self.type == "NonLocalMaterial" : 
+            return 1 + self.chi_b + self.chi_f 
+        elif self.type == "NonLocalCustomFunction":
+            return 1 + self.mat(wavelength)[0] + self.mat(wavelength)[1]
 
     def get_permeability(self,wavelength, verbose=False):
-        if self.type == "magnetic":
+        if self.type == "magnetic" or self.type == "NonLocalMaterial" or self.type == "NonLocalCustomFunction":
             return self.permeability
         elif self.type == "RefractiveIndexInfo":
             if verbose:
@@ -220,6 +248,19 @@ class Material:
             return [1.0, 1.0, 1.0] # We should extend it to an array
         return 1.0
 
+    def get_values_nl(self, wavelength = 500):
+        if self.type == "NonLocalCustomFunction" :
+            self.beta = self.mat(wavelength)[3]
+            self.w_p = self.mat(wavelength)[2]
+            self.chi_b = self.mat(wavelength)[0]
+            self.chi_f = self.mat(wavelength)[1]
+        elif self.type == "NonLocalCustomFunction" :
+            self.beta = self.mat[3]
+            self.w_p = self.mat[2]
+            self.chi_b = self.mat[0]
+            self.chi_f = self.mat[1]
+        return self.chi_b, self.chi_f, self.w_p, self.beta
+        
 # Anisotropic method
 
     def get_permittivity_transmitted_wave(self, wavelength, elevation_beam, precession, nutation, spin):
