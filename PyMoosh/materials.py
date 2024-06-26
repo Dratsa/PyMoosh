@@ -3,7 +3,7 @@ import numpy as np
 from scipy.special import wofz
 import json
 from refractiveindex import RefractiveIndexMaterial
-from PyMoosh.anisotropic_functions import get_refraction_indices
+
 
 class Material:
 
@@ -251,20 +251,6 @@ class Material:
             self.chi_f = self.mat[1]
         return self.chi_b, self.chi_f, self.w_p, self.beta
         
-# Anisotropic method
-
-    def get_permittivity_transmitted_wave(self, wavelength, elevation_beam, precession, nutation, spin):
-        # We have three permittivities to extract
-        refraction_indices_medium = []
-        for material in self.material_list:
-            try:
-                k = material.get_extinction_coefficient(wavelength)
-                refraction_indices_medium.append(material.material.get_epsilon(wavelength))
-            except:
-                n = material.get_refractive_index(wavelength)
-                refraction_indices_medium.append(n**2)
-        return np.sqrt(get_refraction_indices(elevation_beam, refraction_indices_medium, precession, nutation, spin))
-
 def existing_materials():
     import pkgutil
     f = pkgutil.get_data(__name__, "data/material_data.json")
