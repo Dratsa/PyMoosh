@@ -20,6 +20,8 @@ class Material:
             - ExpData                / string                  / 'ExpData'
             - RefractiveIndexInfo    / list(shelf, book, page) / 'RII'
             - Anisotropic            / list(shelf, book, page) / 'ANI'
+            - NonLocalMaterial       / list(complex, float) / 'NL'
+            - NonLocalCustomFunction / string               / 'NL'
     """
 
     def __init__(self, mat, specialType="Default", verbose=False):
@@ -62,19 +64,7 @@ class Material:
                 if mat in database:
                     material_data = database[mat]
                     model = material_data["model"]
-                    """
-                    if model == "ExpData":
-                        self.type = "ExpData"
-                        self.name = "ExpData: "+ str(mat)
 
-                        wl=np.array(material_data["wavelength_list"])
-                        epsilon = np.array(material_data["permittivities"])
-                        if "permittivities_imag" in material_data:
-                            epsilon = epsilon + 1j*np.array(material_data["permittivities_imag"])
-
-                        self.wavelength_list = np.array(wl, dtype=float)
-                        self.permittivities  = np.array(epsilon, dtype=complex)
-                    """
                     if model == "BrendelBormann":
                         self.type = "BrendelBormann"
                         self.name = "BrendelBormann model: " + str(mat)
