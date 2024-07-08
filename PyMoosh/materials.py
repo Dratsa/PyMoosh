@@ -197,6 +197,8 @@ class Material :
 
     def __str__(self) :
         return self.name
+    def __repr__(self):
+        return self.mat
 
     def get_values_nl(self, wavelength = 500) :
 
@@ -222,7 +224,6 @@ class Material :
             return self.permittivity
         
         elif self.type == "CustomFunction" :
-            print('hello there')
             return self.permittivity_function(wavelength)
         
         elif self.type == "BrendelBormann" :
@@ -273,6 +274,7 @@ class Material :
             if verbose :
                 print('Warning : Magnetic parameters from RefractiveIndex Database are not implemented. Default permeability is set to 1.0.')
             return [1.0, 1.0, 1.0] # We should extend it to an array
+
 
         
 def existing_materials():
