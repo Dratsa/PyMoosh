@@ -4,6 +4,7 @@ from scipy.special import wofz
 import json
 from refractiveindex import RefractiveIndexMaterial
 
+
 class Material :
 
     """
@@ -215,6 +216,18 @@ class Material :
             self.chi_f = self.mat[1]
 
         return self.chi_b, self.chi_f, self.w_p, self.beta
+    
+    def ksi(self, wavelength = 500):
+        epsilon_0 = 8.85418782 * 10**(-12)
+        e = -1.602176565*10**(-19)
+        hbar = 6.62607015 * 10**(-34) / (2*np.pi)
+        w = 2 * np.pi * 299792458 / (wavelength * 10**(-9))
+        w_p = self.mat(wavelength)[2]
+        beta = self.mat(wavelength)[3]
+        tau = np.imag(beta**2) / w
+        Vf = np.sqrt(5/3 * np.real(beta**2))
+        rho = -np.pi * w_p**3 * np.sqrt(3 * (epsilon_0 * hbar / Vf)**3) / e**2
+        return tau * rho
 
     def get_permittivity(self, wavelength) :
         if self.type == "simple_perm" :
